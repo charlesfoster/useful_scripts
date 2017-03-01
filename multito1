@@ -1,0 +1,10 @@
+#!/bin/bash
+# Usage: sh multito1.sh file_extension, e.g. sh multito1.sh fasta
+
+for files in *.$1
+do
+awk '/^>/{print s? s"\n"$0:$0;s="";next}{s=s sprintf("%s",$0)}END{if(s)print s}' "$files" > "${files%.fasta}_new.fasta"
+rm "$files"
+mv "${files%.fasta}_new.fasta" "$files" 
+done
+
