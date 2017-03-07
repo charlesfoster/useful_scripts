@@ -1,4 +1,8 @@
 #!/bin/bash
+# Usage: sh base_composition.sh Taxon_name
+# The script will determine the base composition of this taxon for all fasta files in your directory.
+# Note: the fasta sequences must all be on one line for the script to work
+
 for i in *.fasta
 do
 NUM_A=`grep -A 1 ">$1" "$i" |grep -v ">" | grep -io "A"|grep -ic "A"`
