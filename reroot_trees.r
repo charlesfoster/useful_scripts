@@ -1,5 +1,5 @@
 # REROOT MULTIPLE TREES
-
+# Usage: rscript reroot_trees.r outgroup_name
 outgroup = commandArgs(trailingOnly=TRUE)
 
 library(ape)
