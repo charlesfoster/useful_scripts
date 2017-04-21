@@ -1,4 +1,10 @@
-from os import getcwd, walk, listdir, path, rename, system, chdir
+#!/usr/bin/env python2.7
+# Usage: python best_concatenate.py concatenated_filename.nex
+# This script will concatenate all nexus files within your directory
+# All nexus files must end with '.nex'
+# If taxa are missing any genes, the gene sequence will be filled with '?'
+
+from os import getcwd, listdir
 from os.path import isfile, join
 from Bio.Nexus import Nexus
 from sys import argv
