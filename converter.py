@@ -4,6 +4,7 @@
 ### Note: the script relies on your file extensions accurately mirroring the file contents
 ### Acceptable extensions: .nex .nexus (nexus), .fasta .fas (fasta), .phy (phylip)
 ### Usage: ./converter.py
+### Requires biopython (and its dependencies)
 
 from os import getcwd, listdir
 from os.path import isfile, join
