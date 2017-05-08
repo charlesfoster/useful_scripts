@@ -1,6 +1,9 @@
 #!/usr/bin/env python2.7
 
 ### If you use this script, please place your hands together and bow in thanks to Charles Foster from MEEP, the University of Sydney ###
+### Note: the script relies on your file extensions accurately mirroring the file contents
+### Acceptable extensions: .nex .nexus (nexus), .fasta .fas (fasta), .phy (phylip)
+### Usage: ./converter.py
 
 from os import getcwd, listdir
 from os.path import isfile, join
@@ -17,7 +20,7 @@ mypath = getcwd()
 print "Your path is: %s\n"  % mypath
 
 fas_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith("fasta") or f.endswith("fas")] 
-nex_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith("nex")] 
+nex_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith("nex") or f.endswith("nexus")] 
 phy_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith("phy")] 
 
 all_files = fas_files + nex_files + phy_files
