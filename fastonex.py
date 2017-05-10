@@ -1,4 +1,11 @@
-from os import getcwd, listdir
+#!/usr/bin/env python2.7
+# Usage: ./best_concatenate.py fasta_suffix
+# e.g. ./best_concatenate.py fasta
+# This script will convert all fasta files within your directory into nexus format
+# This can be preferable to the converter.py script if you want non-interactive conversions, such as for usage in scripts
+# Requires biopython (and its dependencies)
+
+from os import getcwd, listdir, rename
 from os.path import isfile, join
 from Bio import SeqIO
 from Bio.Alphabet import generic_dna
@@ -25,4 +32,9 @@ for file in fas_files:
      print "Converting: %s" % file
      print"Converted %i taxa\n" % count
 
-print "\nI am finished. Your filenames will be a bit ugly; you might like to rename them."
+new_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith(argv[1]+".nex")]
+
+for file in new_files:
+    rename(file, file.replace(argv[1]+".nex", "nex"))
+     
+print "\nI am finished. Enjoy your new files, my friend!"
