@@ -1,3 +1,9 @@
+#!/usr/bin/env python2.7
+# This script will rescale a chronogram from MCMCTree so that the scale is in millions of years, rather than hundreds of millions of years
+# I have modified this from a script originally written by Dr Simon Ho
+# Usage: ./rescale_tree.py tree_name
+# e.g.: ./rescale_tree.py chronogram.tre
+
 from sys import argv
 from os import system
 
