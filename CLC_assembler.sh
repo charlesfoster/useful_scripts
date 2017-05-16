@@ -16,17 +16,17 @@
 echo "##### STEP 1: De novo assembly of the reads #####"
 echo ""
 echo "I will now do a de novo assembly for each sample."
-for i in *_1.fq;
+for i in *_R1.fastq;
 do
 db=`echo $i | awk -F '_' '{print $1}'`
 echo "I am assembling: $db"
-REVERSE=`echo ${i%_1.fq}_2.fq`
+REVERSE=`echo ${i%_R1.fastq}_R2.fastq`
 echo "Your forward reads are: $i"
 echo "Your reverse reads are: $REVERSE"
 clc_assembler -o $db.assembled.fas -p fb ss 150 600 -q -i $i $REVERSE
 
 # Map the reads to the original assembly
-ASSEMBLED=`echo ${i%_1.fq}.assembled.fas`
+ASSEMBLED=`echo ${i%_R1.fastq}.assembled.fas`
 echo "I will now map the reads from $db to this assembly: $ASSEMBLED"
 clc_mapper -o $db.map1 -p fb ss 150 600 -q -i $i $REVERSE -d $ASSEMBLED -g 1 -e 1
 echo "I am finished working with $db for now."
