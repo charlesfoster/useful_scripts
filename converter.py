@@ -6,7 +6,7 @@
 ### Usage: ./converter.py
 ### Requires biopython (and its dependencies)
 
-from os import getcwd, listdir
+from os import getcwd, listdir, rename
 from os.path import isfile, join
 import os
 from Bio import SeqIO
@@ -76,5 +76,22 @@ elif not option == "1" or option == "2" or option == "3" or option == "4" or opt
     print "That was not an option. This is why we can't have nice things. I quit!\a\a\a"
     quit()
 
-print "\nI am finished. Your filenames will be a bit ugly; you might like to rename them."
-
+for file in os.listdir('.'):
+    if file.endswith('.fas.nex'):
+        rename(file, file.replace(".fas.nex", ".nex"))
+    elif file.endswith('.fasta.nex'):
+        rename(file, file.replace(".fasta.nex", ".nex"))
+    elif file.endswith('.phy.nex'):
+        rename(file, file.replace(".phy.nex", ".nex"))
+    elif file.endswith('.fas.phy'):
+        rename(file, file.replace(".fas.phy", ".phy"))
+    elif file.endswith('.fasta.phy'):
+        rename(file, file.replace(".fasta.phy", ".phy"))
+    elif file.endswith('.nex.phy'):
+        rename(file, file.replace(".nex.phy", ".phy"))
+    elif file.endswith('.nex.fasta'):
+        rename(file, file.replace(".nex.fasta", ".fasta"))
+    elif file.endswith('.phy.fasta'):
+        rename(file, file.replace(".phy.fasta", ".fasta"))
+ 
+print "\nI am now finished converting your files. Have a great day!\n"
