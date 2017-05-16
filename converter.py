@@ -2,7 +2,7 @@
 
 ### If you use this script, please place your hands together and bow in thanks to Charles Foster from MEEP, the University of Sydney ###
 ### Note: the script relies on your file extensions accurately mirroring the file contents
-### Acceptable extensions: .nex .nexus (nexus), .fasta .fas (fasta), .phy (phylip)
+### Acceptable extensions: .nex (nexus), .fasta .fas (fasta), .phy (phylip)
 ### Usage: ./converter.py
 ### Requires biopython (and its dependencies)
 
