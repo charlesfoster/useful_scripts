@@ -26,7 +26,7 @@ echo "Your reverse reads are: $REVERSE"
 clc_assembler -o $db.assembled.fas -p fb ss 150 600 -q -i $i $REVERSE
 
 # Map the reads to the original assembly
-ASSEMBLED=`echo ${i%_R1.fastq}.assembled.fas`
+ASSEMBLED=`echo $db |sed "s|$db|$db.assembled.fas|"`
 echo "I will now map the reads from $db to this assembly: $ASSEMBLED"
 clc_mapper -o $db.map1 -p fb ss 150 600 -q -i $i $REVERSE -d $ASSEMBLED -g 1 -e 1
 echo "I am finished working with $db for now."
