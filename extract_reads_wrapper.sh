@@ -1,4 +1,15 @@
 #!/bin/bash
+# Script credit: Charles Foster, University of Sydney
+# This shell script generates a .pbs script to run analyses on the Artemis HPC at the University of Sydney
+# The aim of the analyses is to map Illumina reads against a reference genome, and then extract the mapped 
+# reads into new fastq files for assembly. The unmapped reads are also stored in a separate .bam file, just
+# in case you want to examine them further
+#
+# Usage: ./extract_reads_wrapper.sh ReferenceName SampleNumber
+# e.g.: ./extract_reads_wrapper.sh Plant 4
+#
+# After running this wrapper, you will need to submit your job to the queue with qsub
+
 echo "#!/bin/bash" >> extract_reads_$1.pbs
 echo "#PBS -q defaultQ -P RDS-FSC-Cockroaches_PBH-RW -l select=1:ncpus=8:mem=12GB -M charles.foster@sydney.edu.au -m ae" >> extract_reads_$1.pbs
 echo "#PBS -l walltime=23:00:00" >> extract_reads_$1.pbs
