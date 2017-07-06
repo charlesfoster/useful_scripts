@@ -7,4 +7,6 @@ best_concatenate.py: This script will concatenate all nexus file within a direct
 
 CLC_assembler.sh: This is a pipeline for genome assembly using the CLC cell assembly command line tools. It is specific to a relatively novel method we trialled in our lab group in which we pooled DNA samples from multiple untagged organisms. Hence, the script carries out a de novo assembly, followed by modifications, then extracts contigs specific to reference organisms that we specify using BLAST.
 
+prune_nex.sh: This script prunes taxa from all nexus files in a directory. It keeps all taxa specified in a separate text file.
+
 I will update this with descriptions of other scripts when I get time.
