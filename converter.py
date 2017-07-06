@@ -91,6 +91,8 @@ for file in os.listdir('.'):
         rename(file, file.replace(".nex.phy", ".phy"))
     elif file.endswith('.nex.fasta'):
         rename(file, file.replace(".nex.fasta", ".fasta"))
+    elif file.endswith('.nex.fas'):
+        rename(file, file.replace(".nex.fas", ".fasta"))
     elif file.endswith('.phy.fasta'):
         rename(file, file.replace(".phy.fasta", ".fasta"))
  
