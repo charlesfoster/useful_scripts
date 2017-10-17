@@ -5,12 +5,17 @@
 #
 # Usage: ./batch_rename_taxa.sh fasta names.txt
 
+for gene in *.$1
+do
+	cat $gene > ${gene%.$1}_new.$1
+done
+
 while read i; 
 do
 	WRONG=`echo ${i} | cut -f1 -d " "` 
 	RIGHT=`echo ${i} | cut -f2 -d " "`
 	
-	for gene in *.$1
+	for gene in *_new.$1
 	do
 		sed -i '' "s|${WRONG}|${RIGHT}|g" $gene
 	done
