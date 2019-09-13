@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 ################################################################################################
-### Purpose: import counts, DE analysis (DESeq2), GO & KEGG enrichment (GOseq) 				 ###
+### Purpose: import counts, DE analysis (DESeq2), GO & KEGG enrichment (GOseq) 	             ###
 ### Most code in here is written by Charles Foster. Some is adapted from the vignettes of    ###
 ### the various packages used.                                                               ###
 ################################################################################################
