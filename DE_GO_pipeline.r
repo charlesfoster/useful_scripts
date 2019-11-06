@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 ################################################################################################
-### Purpose: import counts, DE analysis (DESeq2), GO & KEGG enrichment (GOseq) 	             ###
+### Purpose: import counts, DE analysis (DESeq2), GO & KEGG enrichment (GOseq) 				 ###
 ### Most code in here is written by Charles Foster. Some is adapted from the vignettes of    ###
 ### the various packages used.                                                               ###
 ################################################################################################
@@ -33,6 +33,9 @@ using("edgeR")
 using("readr")
 using("qdapTools")
 using("dplyr")
+using("RColorBrewer")
+using("pheatmap")
+using("ggplot2")
 
 ###### Step 1: Import the count data into a tximport object ######
 cat("\n*** Importing the data ***\n")
@@ -85,6 +88,23 @@ if(length(reslist) == 0){
 	
 	dds <- DESeq(dds)
 	writeLines(rownames(counts(dds)),con="filtered_genes_list.txt")
+	
+	vsd <- vst(dds, blind=FALSE)
+	vsd_counts <- assay(vsd)
+	write.table(vsd_counts, file=paste0("vsd_normalised_counts.txt"), sep='\t', quote=FALSE)
+	sampleDists <- dist(t(assay(vsd)))
+	sampleDistMatrix <- as.matrix(sampleDists)
+	rownames(sampleDistMatrix) <- paste(vsd$Group)
+	colnames(sampleDistMatrix) <- NULL
+	colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+	pdf("sample_correlation.pdf")
+	pheatmap(sampleDistMatrix,
+         clustering_distance_rows=sampleDists,
+         clustering_distance_cols=sampleDists,
+         col=colors)
+	dev.off()
+	plotPCA(vsd, intgroup=c("Group"))
+	ggsave("PCA_plot.pdf")
 	
 	for(i in 1:length(cont.mat[,1])){
 		contrast <- paste(cont.mat[i,1],cont.mat[i,2],sep="_vs_")
