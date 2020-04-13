@@ -34,4 +34,3 @@ paste tmp_group.txt tmp_repl.txt tmp_R1.txt tmp_R2.txt > $1
 rm tmp_group.txt tmp_repl.txt tmp_R1.txt tmp_R2.txt
 
 printf "\nAll done!\n"
-
