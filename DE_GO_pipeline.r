@@ -3,7 +3,7 @@
 ################################################################################################
 ### Purpose: import counts, DE analysis (DESeq2), GO & KEGG enrichment (GOseq) 				 ###
 ### Most code in here is written by Charles Foster. Some is adapted from the vignettes of    ###
-### the various packages used.                                                               ###
+### the various packages used & inspired by helper scripts from Trinity.                     ###
 ################################################################################################
 
 using<-function(...) {
@@ -19,9 +19,9 @@ using<-function(...) {
 using("argparser")
 
 parser <- arg_parser("DE and GOSeq pipeline. Note that with the exception of '-x', 'optional' arguments aren't actually optional. Please include them.")
-parser <- add_argument(parser, c("--samples","--counts_directory","--transcript_to_gene","--gene_lengths","--GO_annotations","--KEGG_annotations","--pathways"), help=c("samples file name", "directory with abundance estimation for each replicate from Salmon","transcript to gene mapping file","gene lengths file","GO annotations for genes","KEGG pathway annotations for genes","KEGG pathway descriptions"), flag=c(FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE))
+parser <- add_argument(parser, c("--fdr", "--samples","--counts_directory","--transcript_to_gene","--gene_lengths","--GO_annotations","--KEGG_annotations","--pathways"), help=c("Value for false discovery rate correction","samples file name", "directory with abundance estimation for each replicate from Salmon","transcript to gene mapping file","gene lengths file","GO annotations for genes","KEGG pathway annotations for genes","KEGG pathway descriptions"), flag=c(FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE,FALSE))
 args <- parse_args(parser, argv = commandArgs(trailingOnly = TRUE))
-if(is.na(args$samples) == T || is.na(args$counts_directory) == T || is.na(args$transcript_to_gene) == T || is.na(args$gene_lengths) == T || is.na(args$GO_annotations) == T || is.na(args$KEGG_annotations) == T || is.na(args$pathways)){
+if(is.na(args$fdr) == T || is.na(args$samples) == T || is.na(args$counts_directory) == T || is.na(args$transcript_to_gene) == T || is.na(args$gene_lengths) == T || is.na(args$GO_annotations) == T || is.na(args$KEGG_annotations) == T || is.na(args$pathways)){
   stop(cat("\nYou have not provided all necessary arguments. \n\nFor help, try: rscript DE_GO_pipeline.r -h\n"), call.=FALSE)
 } 
 
@@ -67,6 +67,8 @@ cat("\nYour contrasts are ",contrasts,"\n")
 
 reslist = list.files(pattern = "*UP.subset")
 
+FDR <- as.numeric(args$fdr)
+
 if(length(reslist) == 0){
 	files <- file.path(args$counts_directory, samples$Replicate,"quant.sf")
 	names(files) <- basename(file.path(args$counts_directory, samples$Replicate))
@@ -77,12 +79,13 @@ if(length(reslist) == 0){
 	cat("\nYou have chosen to use the standard DESeq2 pipeline\n\n")
 	txi <- tximport(files, type = "salmon", tx2gene = tx2gene)
 	
-	group <- as.factor(sort(samples$Group))
-	
+	samples$Group <- as.factor(samples$Group)
+	samples$Batch <- as.factor(samples$Batch)
+		
 	###### Step 2: Run DESeq2 to get DE genes ######
 	cat("\n*** Running DESeq2: Finding DE genes ***\n\n")
 	
-	dds <- DESeqDataSetFromTximport(txi, colData = samples, design = ~Group)
+	dds <- DESeqDataSetFromTximport(txi, colData = samples, design = ~Batch+Group)
 	keep <- rowSums(counts(dds)) >= 10
 	dds <- dds[keep,]
 	
@@ -94,7 +97,7 @@ if(length(reslist) == 0){
 	write.table(vsd_counts, file=paste0("vsd_normalised_counts.txt"), sep='\t', quote=FALSE)
 	sampleDists <- dist(t(assay(vsd)))
 	sampleDistMatrix <- as.matrix(sampleDists)
-	rownames(sampleDistMatrix) <- paste(vsd$Group)
+	rownames(sampleDistMatrix) <- paste(vsd$Group,vsd$Replicate,vsd$Batch,sep="-")
 	colnames(sampleDistMatrix) <- NULL
 	colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
 	pdf("sample_correlation.pdf")
@@ -109,19 +112,19 @@ if(length(reslist) == 0){
 	for(i in 1:length(cont.mat[,1])){
 		contrast <- paste(cont.mat[i,1],cont.mat[i,2],sep="_vs_")
 		cat("\nWorking with: ",contrast,"\n")
-		result <- results(dds, altHypothesis = "greaterAbs", contrast=c("Group",cont.mat[i,1],cont.mat[i,2]), lfcThreshold=1,alpha=0.001)
+		result <- results(dds, altHypothesis = "greaterAbs", contrast=c("Group",cont.mat[i,1],cont.mat[i,2]), lfcThreshold=1,alpha=FDR)
 		baseMeanA_result <- rowMeans(counts(dds, normalized=TRUE)[,colData(dds)$Group == cont.mat[i,1]])
 		baseMeanB_result <- rowMeans(counts(dds, normalized=TRUE)[,colData(dds)$Group == cont.mat[i,2]])
 		result = cbind(baseMeanA_result,baseMeanB_result,as.data.frame(result))
 		result = cbind(sampleA=cont.mat[i,1], sampleB=cont.mat[i,2], as.data.frame(result))
 		result  <- result[order(result$pvalue),]
-		result_sig <- subset(result, padj < 0.001)
+		result_sig <- subset(result, padj < FDR)
 		result_UP1 <- result_sig[c(which(result_sig$log2FoldChange >=1)),]
 		result_UP2 <- result_sig[c(which(result_sig$log2FoldChange <=1)),]
 	
 		### Print summary
 		cat("\nYour results are... *drumroll*\n")
-		cat(contrast,nrow(result_sig),"DE; ",nrow(result_UP1),"upregulated in ",cont.mat[i,1],";",nrow(result_UP2),"upregulated in ",cont.mat[i,2],".")
+		cat(contrast,nrow(result_sig),"DE; ",nrow(result_UP1),"upregulated in ",cont.mat[i,1],";",nrow(result_UP2),"upregulated in ",cont.mat[i,2],".\n")
 	
 		### Get count data
 		ind <- c(grep(cont.mat[i,1],colnames(counts(dds))),grep(cont.mat[i,2],colnames(counts(dds))))
@@ -130,8 +133,8 @@ if(length(reslist) == 0){
 		### Write DE results
 		write.table(result,  file=paste0(cont.mat[i,1],"_vs_",cont.mat[i,2],".DESeq2",".all_genes"), sep='\t', quote=FALSE)
 		write.table(result_sig,  file=paste0(cont.mat[i,1],"_vs_",cont.mat[i,2],".DESeq2",".DE_results"), sep='\t', quote=FALSE) 
-		write.table(result_UP1, file=paste0(cont.mat[i,1],"_vs_",cont.mat[i,2],".DESeq2",".DE_results.P0.001_C0.",cont.mat[i,1],"-UP.subset"), sep='\t', quote=FALSE)
-		write.table(result_UP2, file=paste0(cont.mat[i,1],"_vs_",cont.mat[i,2],".DESeq2",".DE_results.P0.001_C0.",cont.mat[i,2],"-UP.subset"), sep='\t', quote=FALSE)
+		write.table(result_UP1, file=paste0(cont.mat[i,1],"_vs_",cont.mat[i,2],".DESeq2",".DE_results.P",FDR,"_C0.",cont.mat[i,1],"-UP.subset"), sep='\t', quote=FALSE)
+		write.table(result_UP2, file=paste0(cont.mat[i,1],"_vs_",cont.mat[i,2],".DESeq2",".DE_results.P",FDR,"_C0.",cont.mat[i,2],"-UP.subset"), sep='\t', quote=FALSE)
 		
 		write.table(cts_result, file=paste0(cont.mat[i,1],"_vs_",cont.mat[i,2],".DESeq2",".count_matrix"), sep='\t', quote=FALSE)
 		}
@@ -157,13 +160,31 @@ if(length(reslist) == 0){
 	    return(d);
 	}
 	
-	GO_to_gene_list = list()
-	for (gene_id in intersect(names(GO_info_listed), sample_set_gene_ids)) {
-	    go_list = GO_info_listed[[gene_id]]
-	    for (go_id in go_list) {
-	        GO_to_gene_list[[go_id]] = c(GO_to_gene_list[[go_id]], gene_id)
-	    }
-	}
+#	GO_to_gene_list = list()
+#	for (gene_id in intersect(names(GO_info_listed), sample_set_gene_ids)) {
+#	    go_list = GO_info_listed[[gene_id]]
+#	    for (go_id in go_list) {
+#	        GO_to_gene_list[[go_id]] = c(GO_to_gene_list[[go_id]], gene_id)
+#	    }
+#	}
+
+### Note: This chunk of code is replacing the code from the Trinity script.
+### It SHOULD run much faster, but requires the GO annotations file to have GO terms
+### separated by whitespace rather than commas.
+	
+	bak <- sample_set_gene_ids
+	sample_set_gene_ids = as.data.frame(sample_set_gene_ids)
+	colnames(sample_set_gene_ids) <- "GENE"
+
+	go_tmp1 <- scan(args$GO_annotations, what="", sep="\n")
+    go_tmp1 <- gsub(","," ", go_tmp1)
+	go_tmp2 <- strsplit(go_tmp1, "[[:space:]]+")
+	names(go_tmp2) <- sapply(go_tmp2, `[[`, 1)
+	annotation <- lapply(go_tmp2, `[`, -1)
+	go_anno <- list2df(annotation,col1 = "GO",col2="GENE")
+	go_anno <- inner_join(sample_set_gene_ids,go_anno,by="GENE")
+	GO_to_gene_list = unstack(go_anno,GENE~GO)
+	sample_set_gene_ids <- bak
 	
 	all_gene_ids = rep(0,length(names(sample_set_gene_lengths)))
 	names(all_gene_ids) <- names(sample_set_gene_lengths)
@@ -304,13 +325,31 @@ if(length(reslist) == 0){
 	    return(d);
 	}
 	
-	GO_to_gene_list = list()
-	for (gene_id in intersect(names(GO_info_listed), sample_set_gene_ids)) {
-	    go_list = GO_info_listed[[gene_id]]
-	    for (go_id in go_list) {
-	        GO_to_gene_list[[go_id]] = c(GO_to_gene_list[[go_id]], gene_id)
-	    }
-	}
+#	GO_to_gene_list = list()
+#	for (gene_id in intersect(names(GO_info_listed), sample_set_gene_ids)) {
+#	    go_list = GO_info_listed[[gene_id]]
+#	    for (go_id in go_list) {
+#	        GO_to_gene_list[[go_id]] = c(GO_to_gene_list[[go_id]], gene_id)
+#	    }
+#	}
+
+### Note: This chunk of code is replacing the code from the Trinity script.
+### It SHOULD run much faster, but requires the GO annotations file to have GO terms
+### separated by whitespace rather than commas.
+	
+	bak <- sample_set_gene_ids
+	sample_set_gene_ids = as.data.frame(sample_set_gene_ids)
+	colnames(sample_set_gene_ids) <- "GENE"
+
+	go_tmp1 <- scan(args$GO_annotations, what="", sep="\n")
+    go_tmp1 <- gsub(","," ", go_tmp1)
+	go_tmp2 <- strsplit(go_tmp1, "[[:space:]]+")
+	names(go_tmp2) <- sapply(go_tmp2, `[[`, 1)
+	annotation <- lapply(go_tmp2, `[`, -1)
+	go_anno <- list2df(annotation,col1 = "GO",col2="GENE")
+	go_anno <- inner_join(sample_set_gene_ids,go_anno,by="GENE")
+	GO_to_gene_list = unstack(go_anno,GENE~GO)
+	sample_set_gene_ids <- bak
 	
 	all_gene_ids = rep(0,length(names(sample_set_gene_lengths)))
 	names(all_gene_ids) <- names(sample_set_gene_lengths)
