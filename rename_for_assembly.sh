@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script is an example of renaming fastq files to fit in with my RNAseq workflow
+# The renaming is based on a separate config file called renaming.txt: tab delimited, first column = pattern for grep, second column = (e.g.) sample condition
+# It's useful for adding sample conditions into the filename, as well as removing extra junk from the filename
 # Usage: sh rename_for_assembly.sh <outfile_name>
 
 ls *_R1_norm* | sort > fastq_list_R1.txt
