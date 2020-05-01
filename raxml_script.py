@@ -12,7 +12,7 @@ if test_version == "Y" or test_version == "y":
     version = "raxmlHPC-PTHREADS-AVX"
 
 elif test_version == "N" or test_version == "n":
-    version = raw_input("Well, what crappy version are you using then?\n> ")
+    version = raw_input("Well, what version are you using then?\n> ")
 
 elif not test_version == "Y" or test_version == "y" or test_version == "N" or test_version == "n":
     print "Why didn't you answer correctly? I'll have to quit now."
