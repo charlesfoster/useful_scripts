@@ -1,6 +1,7 @@
 #!/bin/bash
 ### Prunes taxa from a nexus file by specifying a list of those to be kept.
 ### Usage: ./prune_nex.sh taxa_to_keep.txt
+### Caution: experimental. Check the output to make sure it looks OK.
 for i in *.nex;
 do
 sed '/matrix/q' $i >> ${i%.nex}_pruned.nex
