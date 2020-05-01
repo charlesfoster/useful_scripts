@@ -1,6 +1,8 @@
 #!/bin/bash
 ### Prunes taxa from a phylip file by specifying a list of those to be kept.
 ### Usage: ./prune_phy.sh taxa_to_keep.txt
+### Caution: experimental. Check the output to make sure it looks OK.
+
 for i in *.phy;
 do
 head -n1 $i >> ${i%.phy}_pruned.phy
