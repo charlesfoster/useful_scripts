@@ -3,7 +3,7 @@
 ### If you use this script, please place your hands together and bow in thanks to Charles Foster from MEEP, the University of Sydney ###
 ### Note: the script relies on your file extensions accurately mirroring the file contents
 ### Acceptable extensions: .nex (nexus), .fasta .fas .fa (fasta), .phy (phylip)
-### Usage: ./converter.py <original_file_type> <desired_file_type>
+### Usage: ./converter_CLI.py <original_file_type> <desired_file_type>
 ### Requires biopython (and its dependencies)
 
 from os import getcwd, listdir, rename
