@@ -20,7 +20,7 @@ mypath = getcwd()
 
 print("Your path is: %s\n"  % mypath)
 
-fas_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith("fasta") or f.endswith("fas")] 
+fas_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith("fasta") or f.endswith("fas") or f.endswith("fa")] 
 nex_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith("nex") or f.endswith("nexus")] 
 phy_files = [f for f in listdir(mypath) if isfile(join(mypath, f)) if f.endswith("phy")] 
 
@@ -81,6 +81,8 @@ for file in os.listdir('.'):
         rename(file, file.replace(".fas.nex", ".nex"))
     elif file.endswith('.fasta.nex'):
         rename(file, file.replace(".fasta.nex", ".nex"))
+    elif file.endswith('.fa.nex'):
+        rename(file, file.replace(".fa.nex", ".nex"))
     elif file.endswith('.phy.nex'):
         rename(file, file.replace(".phy.nex", ".nex"))
     elif file.endswith('.fas.phy'):
