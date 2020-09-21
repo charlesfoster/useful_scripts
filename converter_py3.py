@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python3
 
 ### If you use this script, please place your hands together and bow in thanks to Charles Foster from MEEP, the University of Sydney ###
 ### Note: the script relies on your file extensions accurately mirroring the file contents
